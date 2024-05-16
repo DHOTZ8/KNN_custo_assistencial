@@ -1,0 +1,42 @@
+## MODELO KNN
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsRegressor
+import matplotlib.pyplot as plt
+
+### Importação da base de dados
+custo_assis = pd.read_csv('C:/Users/danny/Downloads/TCC - MBA Puc Minas/Base de dados/Manual/base_de_dados.csv', sep=';')
+
+### Configuração os dados do dataframe
+custo_assis['custo'] = custo_assis['custo'].str.replace(',', '.').astype(float)
+custo_assis['Tempo'] = pd.to_datetime(custo_assis['Tempo'], format='%d/%m/%Y')
+custo_assis.set_index('Tempo', inplace=True)
+
+### Separação de base de treino e base de teste
+X = custo_assis.index.astype(np.int64).values.reshape(-1, 1)
+y = custo_assis['custo'].values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+### Treinamento o modelo KNN
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+knn = KNeighborsRegressor(n_neighbors=5)
+knn.fit(X_train_scaled, y_train)
+
+### Predição
+y_pred = knn.predict(X_test_scaled)
+
+#### Visualização das previsões
+plt.figure(figsize=(10, 6))
+plt.plot(X_test, y_test, label='Valor Real')
+plt.plot(X_test, y_pred, label='Previsão KNN')
+plt.xlabel('Data')
+plt.ylabel('Custo')
+plt.title('Previsão de Custo Assistencial com KNN')
+plt.legend()
+plt.show()
